@@ -182,6 +182,16 @@ button.tag .tick{color:var(--red)}
 .spin-frame img{width:100%;height:100%;object-fit:cover}
 .spin-label{font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--grey)}
 
+/* ── New edition notice ─────────────────── */
+.edition{
+  position:fixed;left:16px;bottom:18px;z-index:70;max-width:70vw;
+  background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--red);
+  border-radius:2px;padding:10px 14px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--bone);display:flex;gap:12px;align-items:center;
+  box-shadow:0 12px 30px -10px rgba(0,0,0,.8);
+}
+.edition button{color:var(--red);font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:11px}
+
 /* ── Footer ─────────────────────────────── */
 footer{max-width:1060px;margin:0 auto;padding:34px 20px 110px;border-top:2px solid var(--bone);color:var(--grey);font-size:12.5px}
 footer .rule{color:var(--bone);font-weight:700;font-size:11px;letter-spacing:.2em;text-transform:uppercase}
@@ -610,4 +620,22 @@ $("fab").onclick=()=>{
 
 updateProgress();
 apply();
+
+/* ── offline cache (service worker; no-ops where unsupported) ── */
+if ("serviceWorker" in navigator) {
+  addEventListener("load", () => {
+    try {
+      navigator.serviceWorker.register("sw.js").catch(()=>{});
+      navigator.serviceWorker.addEventListener("message", ev => {
+        if (ev.data && ev.data.type === "new-edition" && !document.getElementById("edition")) {
+          const d = document.createElement("div");
+          d.className = "edition"; d.id = "edition";
+          d.innerHTML = 'A new edition of the catalog is in <button>Reload</button>';
+          d.querySelector("button").onclick = () => location.reload();
+          document.body.appendChild(d);
+        }
+      });
+    } catch (e) {}
+  });
+}
 </script>

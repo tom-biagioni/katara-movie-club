@@ -55,6 +55,10 @@ head = f"""<!doctype html>
 <meta name="theme-color" content="#111114">
 <link rel="icon" href="{favicon_svg}">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Movie Club">
 <meta property="og:title" content="Katara's Movie Club">
 <meta property="og:description" content="The collection: films and shows selected by the management (Dad).">
 </head>
@@ -80,7 +84,8 @@ for extra in ("providers.json", "add.html"):
     src = os.path.join(ROOT, extra)
     if os.path.exists(src):
         shutil.copy(src, os.path.join(DIST, extra))
-shutil.copy(os.path.join(PIPE, "apple-touch-icon.png"), os.path.join(DIST, "apple-touch-icon.png"))
+for asset in ("apple-touch-icon.png", "sw.js", "manifest.webmanifest", "icon-192.png", "icon-512.png"):
+    shutil.copy(os.path.join(PIPE, asset), os.path.join(DIST, asset))
 
 n_films = sum(1 for m in movies if not m.get("tv"))
 print(f"built dist/: {len(movies)} titles ({n_films} films), {len(posters)} posters, "
