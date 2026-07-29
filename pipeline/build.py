@@ -50,7 +50,7 @@ head = f"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Katara's Movie Club</title>
+<title>The Movie Club</title>
 <meta name="description" content="The collection: films and shows selected by the management (Dad).">
 <meta name="theme-color" content="#111114">
 <link rel="icon" href="{favicon_svg}">
@@ -59,13 +59,13 @@ head = f"""<!doctype html>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Movie Club">
-<meta property="og:title" content="Katara's Movie Club">
+<meta property="og:title" content="The Movie Club">
 <meta property="og:description" content="The collection: films and shows selected by the management (Dad).">
 </head>
 <body>
 """
 body = html
-for tag in ('<meta charset="utf-8">', "<title>Katara's Movie Club</title>",
+for tag in ('<meta charset="utf-8">', "<title>The Movie Club</title>",
             '<meta name="viewport" content="width=device-width, initial-scale=1">'):
     body = body.replace(tag + "\n", "", 1)
 

@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-<title>Katara's Movie Club</title>
+<title>The Movie Club</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 :root{
@@ -78,7 +78,6 @@ select.active{border-color:var(--red);color:var(--red)}
 
 /* ── Cards ──────────────────────────────── */
 .card{text-align:left;display:block;width:100%;-webkit-tap-highlight-color:transparent}
-.card .num{font-size:9.5px;letter-spacing:.14em;color:var(--grey);margin-bottom:5px;font-variant-numeric:tabular-nums}
 .poster{
   position:relative;aspect-ratio:2/3;border-radius:2px;overflow:hidden;
   background:var(--panel);border:1px solid var(--hair);
@@ -200,7 +199,7 @@ footer p{margin-top:6px;font-family:var(--serif);font-style:italic}
 
 <header class="mast">
   <div class="rule">
-    <div class="brand">Katara's Movie Club</div>
+    <div class="brand">The Movie Club</div>
     <div class="cat">Est. 2026 · <span id="count-line"></span></div>
   </div>
   <div class="lede">
@@ -240,7 +239,7 @@ footer p{margin-top:6px;font-family:var(--serif);font-style:italic}
         <option value="__any__">Streaming somewhere</option>
       </select>
       <select id="f-sort" aria-label="Sort">
-        <option value="dad">Catalog order</option>
+        <option value="dad">As filed</option>
         <option value="az">A → Z</option>
         <option value="new">Newest first</option>
         <option value="old">Oldest first</option>
@@ -304,7 +303,6 @@ const MOOD_LABEL = Object.fromEntries(MOODS);
 
 const slug = m => (m.t.toLowerCase().replace(/[^a-z0-9]/g,"")) + m.y;
 DATA.forEach((m,i)=>{ m.id = slug(m); m.i = i; m.sp = m.sp||0; });
-const num = m => "KMC " + String(m.i+1).padStart(3,"0");
 const surname = m => m.tv ? m.net : (m.d.trim().split(/\s+/).pop());
 const byId = new Map(DATA.map(m=>[m.id,m]));
 
@@ -381,7 +379,6 @@ function makeCard(m){
   const el=document.createElement("div");
   el.className="card"+(store.w[m.id]?" watched":"");
   el.innerHTML=`
-    <div class="num">${num(m)}</div>
     <div class="poster" role="button" tabindex="0" aria-label="${m.t}, catalog entry">
       ${posterInner(m)}
       <button class="heart" aria-label="Mark as seen" aria-pressed="${!!store.w[m.id]}">${store.w[m.id]?"♥":"♡"}</button>
@@ -535,7 +532,7 @@ function openTicket(m){
   if(!$("overlay").classList.contains("open")) lastFocus=document.activeElement;
   const b=$("ticket-body");
   b.innerHTML=`
-    <div class="t-no">${num(m)} · In the collection</div>
+    <div class="t-no">In the collection</div>
     <div class="t-top">
       <div class="t-poster"><div class="poster">${posterInner(m)}</div></div>
       <div class="t-head">

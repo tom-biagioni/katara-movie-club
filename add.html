@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Management's Office · Katara's Movie Club</title>
+<title>The Management's Office · The Movie Club</title>
 <meta name="theme-color" content="#111114">
 <style>
 :root{
@@ -51,7 +51,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 <body>
 <div class="wrap">
   <div class="rule">
-    <div class="brand"><a href="./">← Katara's Movie Club</a></div>
+    <div class="brand"><a href="./">← The Movie Club</a></div>
     <div class="brand" style="letter-spacing:.18em;color:var(--grey);font-weight:600">Acquisitions</div>
   </div>
   <h1>The Management's Office</h1>
@@ -63,7 +63,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
 <script>
 const RESULTS = document.getElementById("results");
-const REPO = "tom-biagioni/katara-movie-club";
+const REPO = "tom-biagioni/movie-club";
 let catalog = null;   // existing titles for duplicate marking
 fetch("titles.json").then(r=>r.ok?r.json():null).then(j=>{catalog=j;}).catch(()=>{});
 const norm = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,"");
