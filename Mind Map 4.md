@@ -1,0 +1,159 @@
+# Mind Map
+
+## Katara Movies
+- The Godfather 1 and 2
+- Shawshank Redemption
+- LA Confidential
+- One flew over the cuckoo’s nest
+- Lawrence of Arabia
+- Dr Strangelove
+- Amadeus
+- Raiders of the Lost Ark
+- Evil Dead 2
+- A Clockwork Orange
+- The Searchers
+- The Sting
+- The Conversation
+- High Noon
+- Jurassic Park
+- French Connection
+- Zodiac
+- Rain Man
+- Fargo
+- No Country For Old Men
+- Close Encounters of the Third Kind
+- Network
+- Pulp Fiction
+- Good Will Hunting
+- Taxi Driver
+- Rear Window
+- Get Shorty
+- Double Indemnity
+- Baby Driver
+- Seven Samurai
+- Dead Poets Society
+- Chinatown
+- Alien
+- Crouching Tiger, Hidden Dragon
+- Kung Fu Hustle
+- Shaolin Soccer
+- Throw Mama From A Train
+- The Jerk
+- Grave of the Fireflies
+- The Raid
+- Let The Right One In
+- Ikiru
+- The Abyss
+- Rashomon
+- Oldboy
+- Brick
+- Eternal Sunshine of the Spotless Mind
+- Sling Blade
+- Fargo
+- The Matrix
+- There Will Be Blood
+- Momento
+- High and Low
+- Yojimbo
+- Rosemary’s Baby
+- Children of Men
+- Pan’s labyrinth
+- Psycho
+- Rear Window
+- Blade Runner
+- Monster Squad
+- Stand By Me
+- Return To Oz
+- From Dusk Til Dawn
+- Fight Club
+- The Game
+- Se7en
+- 8mm
+- Sympathy For Mr Vengence
+- Lady Vengence
+- That Thing You Do
+- The Burbs
+- Cry Baby
+- Poltergeist
+- City of God
+- Blade Runner 2049
+- The Usual Suspects
+- Rocky Horror Picture Show
+- Mad Max: Fury Road
+- The Breakfast Club
+- Rocky
+- Rambo: First Blood
+- The Shining
+- The Blues Brothers
+- Silence of the Lambs
+- Ghostbusters
+- Aliens
+- Die Hard
+- Tremors
+- Gladiator
+- Saving Private Ryan
+- Terminator 2
+- 2001
+- Back to the Future
+- Collateral
+- North by Northwest
+- Rounders
+- American Movie
+- American Splendor
+- Adaptation
+- This Is Spinal Tap
+- Best in Show
+- Waiting for Guffman
+- Pleasantville
+- The Big Lebowski
+- They Live
+- Halloween
+- Assault on Pricinct 13
+- The Thing
+- Escape From New York
+- Ghost World
+- Gosford Park
+- Being John Malkovich
+- Almost Famous
+- Raging Bull
+- After Hours
+- The Life Aquatic
+- The Royal Tennenbaums
+- A League of Their Own
+- Mildred Pierce
+- The Road to Perdition
+- Mulholland Drive
+- The Mist
+- The Banshees of Inisherin
+- In Bruges
+- The Fugitive
+- Rushmore
+- Election
+- Dog Day Afternoon
+- Brazil
+- Breathless
+- The Producers
+- Catch Me If You Can
+- Logan
+- True Grit
+- Arrival
+- Amelie
+- Gone Girl
+- A Beautiful Mind
+- The Last Samurai
+- Inside man
+- The Prestige
+- Stranger Than Fiction
+- Split
+- Inherent Vice
+- Lost in Translation
+- Primer
+- 28 Days Later
+
+## Tv Shows
+- Legion
+- Alien: Earth
+- Fargo
+- Breaking Bad
+- Better Call Saul
+- Only Murders In The Building
