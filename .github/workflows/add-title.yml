@@ -1,0 +1,146 @@
+name: Add a title
+
+on:
+  issues:
+    types: [opened, labeled]
+  workflow_dispatch:
+    inputs:
+      query:
+        description: "Title (year optional), e.g. Heat 1995"
+        required: true
+      type:
+        description: "movie or tv"
+        default: "movie"
+      notes:
+        description: "Program notes (optional)"
+        default: ""
+      dry_run:
+        description: "Dry run (no commit)"
+        default: "false"
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: add-title
+
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.issue.labels.*.name, 'add-title')
+    env:
+      GH_TOKEN: ${{ github.token }}
+      OWNER_LOGIN: tom-biagioni
+    steps:
+      - name: Gate petitions from non-management
+        if: github.event_name == 'issues'
+        run: |
+          AUTHOR="${{ github.event.issue.user.login }}"
+          ACTION="${{ github.event.action }}"
+          LABEL="${{ github.event.label.name }}"
+          SENDER="${{ github.event.sender.login }}"
+          NUM="${{ github.event.issue.number }}"
+          if [ "$ACTION" = "opened" ] && [ "$AUTHOR" != "$OWNER_LOGIN" ]; then
+            gh issue comment "$NUM" -R "$GITHUB_REPOSITORY" -b "Petition received. The management will review. (If approved, this gets the \`approved\` label and files itself.)"
+            gh issue edit "$NUM" -R "$GITHUB_REPOSITORY" --add-label petition
+            echo "SKIP=1" >> "$GITHUB_ENV"
+          elif [ "$ACTION" = "labeled" ]; then
+            if [ "$LABEL" != "approved" ] || [ "$SENDER" != "$OWNER_LOGIN" ]; then
+              echo "SKIP=1" >> "$GITHUB_ENV"
+            fi
+          fi
+
+      - uses: actions/checkout@v4
+        if: env.SKIP != '1'
+
+      - uses: actions/setup-python@v5
+        if: env.SKIP != '1'
+        with:
+          python-version: "3.12"
+
+      - name: Parse request
+        if: env.SKIP != '1'
+        run: |
+          python3 - <<'EOF'
+          import json, os, re
+          if os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
+              ev = json.load(open(os.environ["GITHUB_EVENT_PATH"]))
+              inp = ev["inputs"]
+              q, typ, notes = inp["query"], inp.get("type", "movie"), inp.get("notes", "")
+              dry = inp.get("dry_run", "false") == "true"
+          else:
+              ev = json.load(open(os.environ["GITHUB_EVENT_PATH"]))
+              body = ev["issue"]["body"] or ""
+              def field(name):
+                  m = re.search(r"###\s*" + name + r"\s*\n+(.*?)(?=\n###|\Z)", body, re.S | re.I)
+                  v = (m.group(1).strip() if m else "")
+                  return "" if v == "_No response_" else v
+              q = field("Title")
+              typ = "tv" if "tv" in field("Type").lower() else "movie"
+              notes = field("Program notes")
+              dry = False
+          with open(os.environ["GITHUB_ENV"], "a") as f:
+              f.write(f"Q={q}\nTYP={typ}\nDRY={'true' if dry else 'false'}\n")
+              f.write("NOTES<<NEOF\n" + notes + "\nNEOF\n")
+          EOF
+
+      - name: Add the title
+        if: env.SKIP != '1'
+        id: add
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: |
+          set +e
+          ARGS=(--query "$Q" --type "$TYP" --notes "$NOTES")
+          [ "$DRY" = "true" ] && ARGS+=(--dry-run)
+          OUT=$(python3 pipeline/add_title.py "${ARGS[@]}" 2>&1)
+          CODE=$?
+          echo "$OUT"
+          {
+            echo "result<<REOF"
+            echo "$OUT"
+            echo "REOF"
+            echo "code=$CODE"
+          } >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Commit and push
+        if: env.SKIP != '1' && env.DRY != 'true' && steps.add.outputs.code == '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/movies.jsonl posters providers.json
+          git commit -m "Add title via request: $Q"
+          git pull --rebase && git push
+
+      - name: Report back on the issue
+        if: env.SKIP != '1' && github.event_name == 'issues'
+        run: |
+          NUM="${{ github.event.issue.number }}"
+          CODE="${{ steps.add.outputs.code }}"
+          RESULT=$(cat <<'ROEF'
+          ${{ steps.add.outputs.result }}
+          ROEF
+          )
+          if [ "$CODE" = "0" ]; then
+            gh issue comment "$NUM" -R "$GITHUB_REPOSITORY" -b "Filed. Live in ~2 minutes.
+
+          \`\`\`
+          $RESULT
+          \`\`\`"
+            gh issue close "$NUM" -R "$GITHUB_REPOSITORY"
+          else
+            gh issue comment "$NUM" -R "$GITHUB_REPOSITORY" -b "Could not file this one:
+
+          \`\`\`
+          $RESULT
+          \`\`\`"
+            gh issue edit "$NUM" -R "$GITHUB_REPOSITORY" --add-label needs-attention
+          fi
+
+      - name: Fail visibly on dispatch errors
+        if: env.SKIP != '1' && github.event_name == 'workflow_dispatch' && steps.add.outputs.code != '0' && env.DRY != 'true'
+        run: exit 1

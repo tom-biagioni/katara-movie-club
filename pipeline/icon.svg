@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180">
+  <rect width="180" height="180" rx="34" fill="#111114"/>
+  <rect x="12" y="12" width="156" height="156" rx="26" fill="none" stroke="#3c3c42" stroke-width="2"/>
+  <text x="82" y="122" font-family="Georgia, serif" font-weight="bold" font-size="96" fill="#efeae3" text-anchor="middle">K</text>
+  <circle cx="132" cy="112" r="9" fill="#e63946"/>
+  <rect x="46" y="138" width="88" height="4" fill="#e63946"/>
+</svg>

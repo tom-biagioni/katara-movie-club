@@ -84,7 +84,14 @@ def clean(names):
 
 def main():
     root = os.path.dirname(os.path.abspath(__file__))
-    titles = json.load(open(os.path.join(root, "titles.json")))
+    import re as _re
+    titles = []
+    with open(os.path.join(root, "data", "movies.jsonl")) as fh:
+        for line in fh:
+            if line.strip():
+                m = json.loads(line)
+                titles.append({"id": _re.sub(r"[^a-z0-9]", "", m["t"].lower()) + str(m["y"]),
+                               "t": m["t"], "y": m["y"], "tv": bool(m.get("tv"))})
     us, misses = {}, []
     for i, t in enumerate(titles):
         tid, kind = find_id(t["t"], t["y"], t["tv"])

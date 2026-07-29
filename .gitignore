@@ -1,3 +1,5 @@
 .crimson/
 .claude/
 .DS_Store
+dist/
+build/

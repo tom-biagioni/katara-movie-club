@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Management's Office · Katara's Movie Club</title>
+<meta name="theme-color" content="#111114">
+<style>
+:root{
+  --ink:#111114; --panel:#17171b; --bone:#efeae3; --grey:#8f8b83;
+  --line:#3c3c42; --hair:rgba(239,234,227,.14); --red:#e63946; --green:#7ec9a2;
+  --sans:-apple-system,BlinkMacSystemFont,'Helvetica Neue','Segoe UI',Roboto,Arial,sans-serif;
+  --serif:Georgia,'Times New Roman',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--bone);font-family:var(--sans);font-size:15px;line-height:1.55;min-height:100vh}
+.wrap{max-width:640px;margin:0 auto;padding:26px 16px 90px}
+.rule{border-bottom:2px solid var(--bone);display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding-bottom:10px;flex-wrap:wrap}
+.brand{font-size:12px;font-weight:800;letter-spacing:.3em;text-transform:uppercase}
+.brand a{color:var(--bone);text-decoration:none}
+h1{font-size:clamp(28px,6vw,40px);font-weight:800;letter-spacing:-.02em;margin:18px 0 4px}
+.motto{font-family:var(--serif);font-style:italic;color:var(--grey);font-size:14.5px;margin-bottom:22px}
+.search{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:2px;
+  padding:11px 14px;font-size:16px;color:var(--bone);caret-color:var(--red);font-family:var(--sans)}
+.search::placeholder{color:var(--grey)}
+.hint{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin:10px 0 18px}
+.result{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--hair);align-items:center}
+.result img{width:52px;aspect-ratio:2/3;object-fit:cover;border-radius:2px;border:1px solid var(--hair);background:var(--panel)}
+.result .noart{width:52px;aspect-ratio:2/3;border-radius:2px;border:1px solid var(--hair);background:var(--panel)}
+.result .meta{flex:1;min-width:0}
+.result .t{font-weight:700;font-size:14.5px}
+.result .y{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-top:2px}
+.result .dup{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin-top:4px}
+.addbtn{flex:0 0 auto;background:var(--red);color:#16090b;border:none;cursor:pointer;
+  font-weight:800;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  padding:10px 14px;border-radius:2px;font-family:var(--sans)}
+.addbtn[disabled]{background:transparent;border:1px dashed var(--line);color:var(--grey);cursor:default}
+.notesbox{margin-top:10px;display:none;width:100%}
+.notesbox textarea{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:2px;
+  padding:10px 12px;font-size:15px;color:var(--bone);font-family:var(--sans);min-height:72px;resize:vertical}
+.notesbox .row{display:flex;gap:8px;margin-top:8px;align-items:center;justify-content:flex-end}
+.notesbox .lbl{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-right:auto}
+.go{background:var(--red);color:#16090b;border:none;cursor:pointer;font-weight:800;font-size:10.5px;
+  letter-spacing:.16em;text-transform:uppercase;padding:10px 16px;border-radius:2px;font-family:var(--sans)}
+.status{font-family:var(--serif);font-style:italic;color:var(--grey);padding:30px 0;text-align:center}
+footer{margin-top:40px;border-top:1px solid var(--hair);padding-top:14px;color:var(--grey);
+  font-family:var(--serif);font-style:italic;font-size:13px}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="rule">
+    <div class="brand"><a href="./">← Katara's Movie Club</a></div>
+    <div class="brand" style="letter-spacing:.18em;color:var(--grey);font-weight:600">Acquisitions</div>
+  </div>
+  <h1>The Management's Office</h1>
+  <p class="motto">Look a title up, press add, and it files itself into the collection. Petitions from non-management await approval.</p>
+  <input class="search" id="q" type="search" placeholder="Search films &amp; shows…" autofocus>
+  <div class="hint" id="hint">Lookup via the iTunes catalog · filing via GitHub</div>
+  <div id="results"></div>
+</div>
+
+<script>
+const RESULTS = document.getElementById("results");
+const REPO = "tom-biagioni/katara-movie-club";
+let catalog = null;   // existing titles for duplicate marking
+fetch("titles.json").then(r=>r.ok?r.json():null).then(j=>{catalog=j;}).catch(()=>{});
+const norm = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,"");
+function findDup(title, year){
+  if(!catalog) return null;
+  return catalog.find(t => norm(t.t) === norm(title) && Math.abs(t.y - year) <= 1) ||
+         catalog.find(t => norm(t.t) === norm(title)) || null;
+}
+
+let timer = null, seq = 0;
+document.getElementById("q").addEventListener("input", e => {
+  clearTimeout(timer);
+  const q = e.target.value.trim();
+  if(q.length < 2){ RESULTS.innerHTML = ""; return; }
+  timer = setTimeout(() => search(q), 350);
+});
+
+function jsonp(url){
+  return new Promise((res, rej) => {
+    const cb = "itcb" + (++seq);
+    window[cb] = data => { delete window[cb]; s.remove(); res(data); };
+    const s = document.createElement("script");
+    s.src = url + "&callback=" + cb;
+    s.onerror = () => { delete window[cb]; s.remove(); rej(new Error("lookup failed")); };
+    document.head.appendChild(s);
+  });
+}
+
+async function search(q){
+  RESULTS.innerHTML = `<div class="status">Consulting the card catalog…</div>`;
+  try{
+    const [mv, tv] = await Promise.all([
+      jsonp(`https://itunes.apple.com/search?media=movie&limit=6&term=${encodeURIComponent(q)}`),
+      jsonp(`https://itunes.apple.com/search?media=tvShow&entity=tvSeason&limit=4&term=${encodeURIComponent(q)}`),
+    ]);
+    const items = [];
+    (mv.results||[]).forEach(r => items.push({
+      t: r.trackName, y: +(r.releaseDate||"0").slice(0,4), tv: false,
+      art: (r.artworkUrl100||"").replace("100x100bb","200x300bb"),
+    }));
+    const seen = new Set();
+    (tv.results||[]).forEach(r => {
+      const name = (r.collectionName||"").replace(/,?\s*(Season|Vol\.?|Volume|Series)\s*\d+.*$/i,"").trim();
+      if(!name || seen.has(norm(name))) return;
+      seen.add(norm(name));
+      items.push({ t: name, y: +(r.releaseDate||"0").slice(0,4), tv: true,
+                   art: (r.artworkUrl100||"").replace("100x100bb","200x300bb") });
+    });
+    render(items.slice(0, 9));
+  } catch(err){
+    RESULTS.innerHTML = `<div class="status">The card catalog is not answering. Type the exact title and use Add anyway — the archivist double-checks everything.</div>` ;
+    render([{t: q, y: 0, tv: false, art: "", manual: true}], true);
+  }
+}
+
+function render(items, append){
+  if(!append) RESULTS.innerHTML = "";
+  if(!items.length){ RESULTS.innerHTML = `<div class="status">Nothing by that name. Check the spelling, or try fewer words.</div>`; return; }
+  items.forEach(item => {
+    const dup = findDup(item.t, item.y);
+    const row = document.createElement("div");
+    row.className = "result";
+    row.innerHTML = `
+      ${item.art ? `<img src="${item.art}" alt="">` : `<div class="noart"></div>`}
+      <div class="meta">
+        <div class="t"></div>
+        <div class="y">${item.y || ""} · ${item.tv ? "TV series" : "Film"}</div>
+        ${dup ? `<div class="dup">Already in the collection (${dup.y})</div>` : ""}
+        <div class="notesbox">
+          <div class="lbl" style="margin-bottom:6px">Program notes — optional, one or two sentences, no spoilers</div>
+          <textarea placeholder="The pitch…"></textarea>
+          <div class="row">
+            <span class="lbl">Opens a prefilled GitHub form — press Submit there</span>
+            <button class="go">File it</button>
+          </div>
+        </div>
+      </div>
+      <button class="addbtn" ${dup ? "disabled" : ""}>${dup ? "On file" : "Add"}</button>`;
+    row.querySelector(".t").textContent = item.t;
+    const box = row.querySelector(".notesbox");
+    if(!dup){
+      row.querySelector(".addbtn").onclick = () => {
+        box.style.display = box.style.display === "block" ? "none" : "block";
+        if(box.style.display === "block") box.querySelector("textarea").focus();
+      };
+      row.querySelector(".go").onclick = () => {
+        const notes = box.querySelector("textarea").value.trim();
+        const qtitle = item.y ? `${item.t} ${item.y}` : item.t;
+        const params = new URLSearchParams({
+          template: "add-title.yml",
+          title: `[Add] ${item.t}${item.y ? ` (${item.y})` : ""}`,
+          "film-title": qtitle,
+          "media-type": item.tv ? "TV series" : "Film",
+        });
+        if(notes) params.set("program-notes", notes);
+        window.open(`https://github.com/${REPO}/issues/new?${params}`, "_blank", "noopener");
+      };
+    }
+    RESULTS.appendChild(row);
+  });
+}
+</script>
+<div class="wrap" style="padding-top:0">
+  <footer>Filing is handled by the archivist (a robot). Duplicates are refused politely. Petitions from anyone who is not Dad wait for the <em>approved</em> stamp.</footer>
+</div>
+</body>
+</html>

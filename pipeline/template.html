@@ -1,0 +1,613 @@
+<meta charset="utf-8">
+<title>Katara's Movie Club</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --ink:#111114; --panel:#17171b; --panel2:#1c1c22;
+  --bone:#efeae3; --grey:#8f8b83; --line:#3c3c42; --hair:rgba(239,234,227,.14);
+  --red:#e63946; --green:#7ec9a2; --green-line:#3f6b56;
+  --sans:-apple-system,BlinkMacSystemFont,'Helvetica Neue','Segoe UI',Roboto,Arial,sans-serif;
+  --serif:Georgia,'Times New Roman',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--ink);color:var(--bone);font-family:var(--sans);font-size:15px;line-height:1.55;min-height:100vh}
+button{font-family:var(--sans);cursor:pointer;color:inherit;background:none;border:none;font-size:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+img{display:block;max-width:100%}
+a{color:var(--red)}
+
+.caps{letter-spacing:.16em;text-transform:uppercase}
+
+/* ── Masthead ───────────────────────────── */
+.mast{max-width:1060px;margin:0 auto;padding:26px 16px 0}
+.mast .rule{border-bottom:2px solid var(--bone);display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding-bottom:10px;flex-wrap:wrap}
+.brand{font-size:13.5px;font-weight:800;letter-spacing:.32em;text-transform:uppercase}
+.cat{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey)}
+.lede{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin:18px 0 8px}
+.lede h1{font-size:clamp(34px,6.4vw,58px);font-weight:800;letter-spacing:-.02em;line-height:1.02}
+.lede .motto{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--grey);padding-bottom:6px}
+.progress{display:flex;align-items:center;gap:12px;margin:10px 0 18px}
+.progress .n{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);font-variant-numeric:tabular-nums;white-space:nowrap}
+.progress .bar{flex:1;height:2px;background:var(--line)}
+.progress .fill{height:100%;background:var(--red);width:0%;transition:width .5s ease}
+
+/* ── Controls ───────────────────────────── */
+.segwrap{max-width:1060px;margin:0 auto;padding:0 16px}
+.seg{display:flex;gap:22px;border-bottom:1px solid var(--hair)}
+.seg button{padding:8px 2px 10px;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);border-bottom:2px solid transparent;margin-bottom:-1px}
+.seg button[aria-pressed="true"]{color:var(--bone);border-color:var(--red)}
+.controls{position:sticky;top:0;z-index:40;background:rgba(17,17,20,.93);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--hair);padding:10px 16px}
+.controls-inner{max-width:1060px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.search{
+  width:100%;background:var(--panel);border:1px solid var(--line);border-radius:2px;
+  padding:9px 14px;font-size:16px;color:var(--bone);font-family:var(--sans);caret-color:var(--red);
+}
+.search::placeholder{color:var(--grey);opacity:.8}
+.chiprow{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.chiprow::-webkit-scrollbar{display:none}
+.chip{
+  flex:0 0 auto;padding:6px 11px;border-radius:2px;font-size:10.5px;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;
+  background:transparent;border:1px solid var(--line);color:#c9c4ba;white-space:nowrap;
+}
+.chip[aria-pressed="true"]{border-color:var(--red);color:var(--red)}
+.chip.reset{color:var(--grey);border-style:dashed;display:none}
+.chip.reset.show{display:block}
+.selectrow{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.selectrow::-webkit-scrollbar{display:none}
+select{
+  flex:0 0 auto;appearance:none;-webkit-appearance:none;
+  background:var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238f8b83' fill='none' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat right 9px center;
+  border:1px solid var(--line);border-radius:2px;color:#c9c4ba;
+  font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:6px 24px 6px 10px;font-family:var(--sans);
+}
+select.active{border-color:var(--red);color:var(--red)}
+
+/* ── Sections ───────────────────────────── */
+.wrap{max-width:1060px;margin:0 auto;padding:0 16px 90px}
+.section-head{display:flex;align-items:baseline;gap:12px;margin:26px 0 3px;
+  font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase}
+.section-head .dash{flex:1;border-top:1px solid var(--hair);transform:translateY(-4px)}
+.section-sub{font-family:var(--serif);font-style:italic;color:var(--grey);font-size:13.5px;margin-bottom:14px}
+.shelf{display:flex;gap:16px;overflow-x:auto;padding:4px 2px 14px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.shelf .card{flex:0 0 132px;scroll-snap-align:start}
+.resultmeta{color:var(--grey);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin:16px 0 12px;font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:22px 14px}
+@media(min-width:640px){.grid{grid-template-columns:repeat(auto-fill,minmax(146px,1fr));gap:26px 18px}}
+
+/* ── Cards ──────────────────────────────── */
+.card{text-align:left;display:block;width:100%;-webkit-tap-highlight-color:transparent}
+.card .num{font-size:9.5px;letter-spacing:.14em;color:var(--grey);margin-bottom:5px;font-variant-numeric:tabular-nums}
+.poster{
+  position:relative;aspect-ratio:2/3;border-radius:2px;overflow:hidden;
+  background:var(--panel);border:1px solid var(--hair);
+  transition:transform .16s ease,box-shadow .16s ease;
+}
+@media(hover:hover){
+  .card:hover .poster{transform:translateY(-2px);box-shadow:0 0 0 1px var(--red),0 12px 26px -12px rgba(0,0,0,.9)}
+}
+.poster img{width:100%;height:100%;object-fit:cover;filter:saturate(.92)}
+.poster .fb{width:100%;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:12px 10px;background:var(--panel2)}
+.fb .fb-t{font-size:15px;font-weight:800;line-height:1.2;text-transform:uppercase;letter-spacing:.04em;color:var(--bone);padding-right:24px}
+.fb .fb-y{font-size:10px;letter-spacing:.2em;color:var(--grey)}
+.fb .fb-y::before{content:"";display:block;width:26px;border-top:2px solid var(--red);margin-bottom:8px}
+.heart{
+  position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:2px;
+  background:rgba(17,17,20,.72);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--bone);
+  border:1px solid var(--hair);line-height:1;
+}
+.heart[aria-pressed="true"]{color:var(--red);border-color:var(--red)}
+.stamp{
+  position:absolute;left:-5px;bottom:12px;transform:rotate(-4deg);
+  font-size:9.5px;font-weight:800;letter-spacing:.22em;color:var(--red);
+  border:1.5px solid var(--red);border-radius:2px;padding:2px 7px 2px 9px;
+  background:rgba(17,17,20,.85);display:none;
+}
+@keyframes stampin{0%{transform:rotate(-4deg) scale(1.5);opacity:0}70%{transform:rotate(-4deg) scale(.95);opacity:1}100%{transform:rotate(-4deg) scale(1)}}
+.card.watched .stamp{display:block}
+@media(prefers-reduced-motion:no-preference){.card.watched .stamp{animation:stampin .3s ease-out}}
+.card.watched .poster img,.card.watched .poster .fb{opacity:.5;filter:saturate(.5)}
+.card-t{margin-top:7px;font-size:12px;font-weight:700;line-height:1.3;letter-spacing:.05em;text-transform:uppercase;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-m{margin-top:2px;font-size:11px;color:var(--grey);display:flex;gap:5px;align-items:center;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.mini{font-size:8.5px;letter-spacing:.12em;border:1px solid var(--line);border-radius:2px;padding:0 4px;color:var(--grey);text-transform:uppercase}
+.mini.first{color:#c9c4ba;border-color:#55555e}
+.starbadge{color:var(--red);font-size:10.5px;letter-spacing:.05em}
+
+/* ── Empty state ────────────────────────── */
+.empty{text-align:center;padding:60px 20px;color:var(--grey)}
+.empty .rule2{width:36px;margin:0 auto 16px;border-top:2px solid var(--red)}
+.empty b{color:var(--bone)}
+.empty p{font-family:var(--serif);font-style:italic;font-size:15px}
+
+/* ── Catalog card (modal) ───────────────── */
+.overlay{position:fixed;inset:0;z-index:100;background:rgba(10,10,12,.82);backdrop-filter:blur(6px);
+  display:none;align-items:flex-end;justify-content:center}
+@media(min-width:640px){.overlay{align-items:center;padding:30px}}
+.overlay.open{display:flex}
+.ticket{
+  position:relative;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;
+  background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--bone);
+  border-radius:6px 6px 0 0;padding:22px 22px 26px;
+}
+@media(min-width:640px){.ticket{border-radius:6px;padding:26px 28px 30px}}
+.close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:2px;
+  background:var(--panel2);border:1px solid var(--hair);font-size:14px;display:flex;align-items:center;justify-content:center}
+.t-no{font-size:10px;letter-spacing:.22em;color:var(--red);text-transform:uppercase;margin-bottom:8px;font-variant-numeric:tabular-nums}
+.t-top{display:flex;gap:18px}
+.t-poster{flex:0 0 112px}
+.t-head{flex:1;min-width:0}
+.t-title{font-size:23px;font-weight:800;letter-spacing:-.01em;line-height:1.15;text-wrap:balance}
+.t-facts{margin-top:6px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);line-height:1.8}
+.t-facts .r{color:var(--red)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tag{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:3px 8px;border-radius:2px;border:1px solid var(--line);color:#c9c4ba}
+.tag.stream{color:var(--green);border-color:var(--green-line)}
+.tag.faded{color:var(--grey);border-style:dashed}
+button.tag{cursor:pointer}
+button.tag:hover{border-color:var(--red);color:var(--red)}
+button.tag .tick{color:var(--red)}
+.also{margin-top:16px}
+.notes{margin-top:18px;border-top:1px solid var(--hair);padding-top:14px}
+.notes-label{font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--grey);margin-bottom:6px}
+.notes p{font-family:var(--serif);font-style:italic;font-size:16.5px;line-height:1.6;max-width:56ch}
+.watch{margin-top:16px}
+.wlink{display:inline-block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:4px 9px;border-radius:2px;
+  border:1px solid var(--line);color:var(--bone);text-decoration:none}
+.wlink:hover{border-color:var(--red);color:var(--red)}
+.asof{font-size:10px;color:var(--grey);align-self:center;letter-spacing:.08em}
+.t-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  margin-top:20px;border-top:1px solid var(--hair);padding-top:16px}
+.wbtn{padding:8px 14px;border-radius:2px;font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  border:1.5px solid var(--line);color:var(--bone)}
+.wbtn[aria-pressed="true"]{border-color:var(--red);color:var(--red)}
+.stars{display:flex;gap:2px;align-items:center}
+.stars .lbl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);margin-right:6px}
+.star{font-size:20px;color:#43434b;padding:2px;line-height:1}
+.star.on{color:var(--red)}
+
+/* ── Surprise ───────────────────────────── */
+.fab{
+  position:fixed;right:16px;bottom:18px;z-index:60;
+  background:var(--red);color:#16090b;font-weight:800;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  padding:12px 16px;border-radius:2px;box-shadow:0 10px 28px -8px rgba(230,57,70,.5),0 4px 14px rgba(0,0,0,.5);
+}
+.fab:active{transform:scale(.97)}
+.spin-overlay{position:fixed;inset:0;z-index:90;background:rgba(10,10,12,.88);backdrop-filter:blur(8px);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.spin-overlay.open{display:flex}
+.spin-frame{width:150px;aspect-ratio:2/3;border-radius:2px;overflow:hidden;border:1px solid var(--bone);box-shadow:0 0 0 1px var(--ink),0 0 0 2px var(--red)}
+.spin-frame img{width:100%;height:100%;object-fit:cover}
+.spin-label{font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--grey)}
+
+/* ── Footer ─────────────────────────────── */
+footer{max-width:1060px;margin:0 auto;padding:34px 20px 110px;border-top:2px solid var(--bone);color:var(--grey);font-size:12.5px}
+footer .rule{color:var(--bone);font-weight:700;font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+footer p{margin-top:6px;font-family:var(--serif);font-style:italic}
+</style>
+
+<header class="mast">
+  <div class="rule">
+    <div class="brand">Katara's Movie Club</div>
+    <div class="cat">Est. 2026 · <span id="count-line"></span></div>
+  </div>
+  <div class="lede">
+    <h1>The Collection</h1>
+    <p class="motto">Selected by the management. Attendance encouraged.</p>
+  </div>
+  <div class="progress">
+    <span class="n" id="watched-line">0 / 0 seen</span>
+    <div class="bar"><div class="fill" id="progress-fill"></div></div>
+  </div>
+</header>
+
+<div class="segwrap">
+  <div class="seg" role="tablist" id="seg">
+    <button role="tab" data-seg="movies" aria-pressed="true">Films</button>
+    <button role="tab" data-seg="tv" aria-pressed="false">Television</button>
+    <button role="tab" data-seg="watched" aria-pressed="false">Seen</button>
+  </div>
+</div>
+
+<nav class="controls" aria-label="Search and filters">
+  <div class="controls-inner">
+    <input class="search" id="search" type="search" placeholder="Search the catalog — titles, directors, vibes…" aria-label="Search">
+    <div class="chiprow" id="moods" aria-label="Mood filters"></div>
+    <div class="selectrow">
+      <select id="f-genre" aria-label="Genre"><option value="">All genres</option></select>
+      <select id="f-decade" aria-label="Decade"><option value="">Any decade</option></select>
+      <select id="f-rating" aria-label="Rating">
+        <option value="">Any rating</option>
+        <option value="G/PG">G & PG</option>
+        <option value="PG-13">PG-13</option>
+        <option value="R">R</option>
+        <option value="NR">Not rated</option>
+      </select>
+      <select id="f-service" aria-label="Streaming service" style="display:none">
+        <option value="">Any service</option>
+        <option value="__any__">Streaming somewhere</option>
+      </select>
+      <select id="f-sort" aria-label="Sort">
+        <option value="dad">Catalog order</option>
+        <option value="az">A → Z</option>
+        <option value="new">Newest first</option>
+        <option value="old">Oldest first</option>
+        <option value="short">Shortest first</option>
+        <option value="spooky">Spookiest first</option>
+      </select>
+      <button class="chip reset" id="reset">✕ Clear</button>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section id="shelf-sec" aria-label="Start here">
+    <h2 class="section-head">Start here <span class="dash"></span></h2>
+    <p class="section-sub">Sure things, per the management.</p>
+    <div class="shelf" id="shelf"></div>
+  </section>
+  <div class="resultmeta" id="resultmeta"></div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none"></div>
+</div>
+
+<button class="fab" id="fab">Surprise me</button>
+
+<div class="spin-overlay" id="spin" aria-hidden="true">
+  <div class="spin-frame"><img id="spin-img" alt=""></div>
+  <div class="spin-label">Selecting tonight's feature</div>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="Catalog entry">
+  <div class="ticket" id="ticket">
+    <button class="close" id="close" aria-label="Close">✕</button>
+    <div id="ticket-body"></div>
+  </div>
+</div>
+
+<footer>
+  <p class="rule">Rule №1 of Movie Club: tell Dad which one you watched.</p>
+  <p>Programmed by Dad. Complaints may be directed to the management (also Dad).</p>
+  <p id="office" style="display:none"><a href="add.html" style="color:inherit">Petition the management for a new title &#8594;</a></p>
+  <p id="attrib" style="display:none">Streaming availability by JustWatch, via TMDB.</p>
+</footer>
+
+<script>
+const DATA = __DATA__;
+const POSTERS = __POSTERS__;
+
+const MOODS = [
+  ["funny","Make me laugh"],
+  ["scary","Scare me"],
+  ["tense","Edge of my seat"],
+  ["mindbendy","Melt my brain"],
+  ["crime","Cool crime"],
+  ["action","Action rush"],
+  ["epic","Big & epic"],
+  ["feelgood","Feel-good"],
+  ["feels","Big feelings"],
+  ["weird","Weird & wonderful"],
+];
+const MOOD_LABEL = Object.fromEntries(MOODS);
+
+const slug = m => (m.t.toLowerCase().replace(/[^a-z0-9]/g,"")) + m.y;
+DATA.forEach((m,i)=>{ m.id = slug(m); m.i = i; m.sp = m.sp||0; });
+const num = m => "KMC " + String(m.i+1).padStart(3,"0");
+const surname = m => m.tv ? m.net : (m.d.trim().split(/\s+/).pop());
+const byId = new Map(DATA.map(m=>[m.id,m]));
+
+/* same-director groups (dk overrides for split credit strings) */
+const groups = new Map();
+DATA.forEach(m=>{
+  const k = m.dk || m.d;
+  if(!groups.has(k)) groups.set(k, []);
+  groups.get(k).push(m);
+});
+function alsoBlock(m){
+  const others = (groups.get(m.dk || m.d) || []).filter(x=>x.id!==m.id);
+  if(!others.length) return "";
+  const chips = others.slice().sort((a,b)=>a.y-b.y).map(x=>
+    `<button class="tag" data-also="${x.id}">${x.t} ${x.tv?"(TV)":x.y}${store.w[x.id]?` <span class="tick">✓</span>`:""}</button>`).join("");
+  return `<div class="also"><div class="notes-label">Also in the collection</div><div class="chips">${chips}</div></div>`;
+}
+
+/* ── persistence (best effort) ── */
+const KEY = "katara-movie-club-v1";
+let store = {w:{}, s:{}};
+try { store = Object.assign(store, JSON.parse(localStorage.getItem(KEY)||"{}")); } catch(e){}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){} };
+
+/* ── state ── */
+const state = { seg:"movies", q:"", moods:new Set(), genre:"", decade:"", rating:"", service:"", sort:"dad" };
+const $ = id => document.getElementById(id);
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ── header counts ── */
+const nMovies = DATA.filter(m=>!m.tv).length, nTv = DATA.filter(m=>m.tv).length;
+$("count-line").textContent = `Catalog of ${DATA.length}`;
+function updateProgress(){
+  const n = Object.keys(store.w).length, total = DATA.length;
+  $("watched-line").textContent = `${n} / ${total} seen`;
+  $("progress-fill").style.width = (100*n/total) + "%";
+}
+
+/* ── filter options ── */
+const genres = [...new Set(DATA.flatMap(m=>m.g))].sort();
+genres.forEach(g=>{ const o=document.createElement("option"); o.value=o.textContent=g; $("f-genre").appendChild(o); });
+const decades = [...new Set(DATA.map(m=>Math.floor(m.y/10)*10))].sort();
+decades.forEach(d=>{ const o=document.createElement("option"); o.value=d; o.textContent=d+"s"; $("f-decade").appendChild(o); });
+
+MOODS.forEach(([key,label])=>{
+  const b=document.createElement("button");
+  b.className="chip"; b.dataset.mood=key; b.setAttribute("aria-pressed","false");
+  b.textContent = label;
+  b.onclick=()=>{ state.moods.has(key)?state.moods.delete(key):state.moods.add(key);
+    b.setAttribute("aria-pressed", state.moods.has(key)); apply(); };
+  $("moods").appendChild(b);
+});
+
+/* ── cards ── */
+function fmtRt(m){
+  if(m.tv) return `${m.sea} season${m.sea>1?"s":""}`;
+  return m.rt>=60 ? `${Math.floor(m.rt/60)}h ${String(m.rt%60).padStart(2,"0")}m` : m.rt+"m";
+}
+function yearLine(m){ return m.tv ? m.yrs.replace("-","–") : m.y; }
+
+function posterInner(m){
+  if(POSTERS[m.id]) return `<img src="${POSTERS[m.id]}" alt="${m.t} poster" loading="lazy" decoding="async">`;
+  return `<div class="fb"><div class="fb-t">${m.t}</div><div class="fb-y">${yearLine(m)}</div></div>`;
+}
+function badges(m){
+  let b="";
+  if(m.sp) b += `<span class="mini">Spook ${"•".repeat(m.sp)}</span>`;
+  if(m.sub) b += `<span class="mini">Sub</span>`;
+  if(m.start) b += `<span class="mini first">First pick</span>`;
+  if(store.s[m.id]) b += `<span class="starbadge">★${store.s[m.id]}</span>`;
+  return b;
+}
+function makeCard(m){
+  const el=document.createElement("div");
+  el.className="card"+(store.w[m.id]?" watched":"");
+  el.innerHTML=`
+    <div class="num">${num(m)}</div>
+    <div class="poster" role="button" tabindex="0" aria-label="${m.t}, catalog entry">
+      ${posterInner(m)}
+      <button class="heart" aria-label="Mark as seen" aria-pressed="${!!store.w[m.id]}">${store.w[m.id]?"♥":"♡"}</button>
+      <span class="stamp">SEEN</span>
+    </div>
+    <div class="card-t">${m.t}</div>
+    <div class="card-m"><span>${yearLine(m)}</span><span>·</span><span>${surname(m)}</span><span class="bdg">${badges(m)}</span></div>`;
+  const open = ()=>openTicket(m);
+  el.querySelector(".poster").addEventListener("click",e=>{ if(!e.target.closest(".heart")) open(); });
+  el.querySelector(".poster").addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();open();} });
+  el.querySelector(".heart").addEventListener("click",()=>toggleWatched(m));
+  return el;
+}
+const cards = new Map();
+DATA.forEach(m=>cards.set(m.id, makeCard(m)));
+
+const shelfEl=$("shelf");
+DATA.filter(m=>m.start).forEach(m=>shelfEl.appendChild(makeCard(m)));
+
+/* ── watched / stars ── */
+function refreshCard(m){
+  const fresh = makeCard(m);
+  const old = cards.get(m.id);
+  old.replaceWith(fresh); cards.set(m.id, fresh);
+  if(m.start){ shelfEl.querySelectorAll(".card").forEach(c=>{
+    if(c.querySelector(".card-t").textContent===m.t) c.replaceWith(makeCard(m));
+  });}
+}
+function toggleWatched(m){
+  const on = !store.w[m.id];
+  if(on) store.w[m.id]=1; else { delete store.w[m.id]; delete store.s[m.id]; }
+  save(); updateProgress(); refreshCard(m);
+  if(state.seg==="watched") apply();
+}
+
+/* ── filtering ── */
+const normTxt = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function matches(m){
+  if(state.seg==="movies" && m.tv) return false;
+  if(state.seg==="tv" && !m.tv) return false;
+  if(state.seg==="watched" && !store.w[m.id]) return false;
+  if(state.q){
+    const hay = normTxt([m.t,m.d,m.g.join(" "),m.p,yearLine(m)].join(" "));
+    if(!state.q.split(/\s+/).every(w=>hay.includes(w))) return false;
+  }
+  if(state.moods.size && !m.m.some(mm=>state.moods.has(mm))) return false;
+  if(state.genre && !m.g.includes(state.genre)) return false;
+  if(state.decade && Math.floor(m.y/10)*10 != state.decade) return false;
+  if(state.rating){
+    if(state.rating==="G/PG"){ if(!["G","PG"].includes(m.r)) return false; }
+    else if(state.rating==="NR"){ if(m.r!=="NR") return false; }
+    else if(m.r!==state.rating) return false;
+  }
+  if(state.service){
+    const e = PROV && PROV.us && PROV.us[m.id];
+    const on = e && e.s && e.s.length;
+    if(state.service==="__any__"){ if(!on) return false; }
+    else if(!on || !e.s.includes(state.service)) return false;
+  }
+  return true;
+}
+const sorters = {
+  dad:(a,b)=>a.i-b.i, az:(a,b)=>a.t.localeCompare(b.t),
+  new:(a,b)=>b.y-a.y, old:(a,b)=>a.y-b.y,
+  short:(a,b)=>(a.rt||999)-(b.rt||999), spooky:(a,b)=>(b.sp-a.sp)||(a.i-b.i),
+};
+let current=[];
+function apply(){
+  current = DATA.filter(matches).sort(sorters[state.sort]);
+  const grid=$("grid"); grid.textContent="";
+  current.forEach(m=>grid.appendChild(cards.get(m.id)));
+  const anyFilter = state.q||state.moods.size||state.genre||state.decade||state.rating||state.service;
+  $("reset").classList.toggle("show", !!anyFilter);
+  ["f-genre","f-decade","f-rating","f-service"].forEach(id=>$(id).classList.toggle("active", !!$(id).value));
+  $("shelf-sec").style.display = (state.seg==="movies" && !anyFilter) ? "" : "none";
+  const label = state.seg==="tv" ? "shows" : "films";
+  $("resultmeta").textContent = state.seg==="watched"
+    ? `${current.length} seen — the management is pleased`
+    : anyFilter ? `${current.length} ${label} match` : `All ${current.length} ${label} · tap a poster for the program notes`;
+  const empty=$("empty");
+  if(!current.length){
+    empty.style.display="";
+    empty.innerHTML = state.seg==="watched"
+      ? `<div class="rule2"></div><b>Nothing logged yet.</b><p>See something, then stamp it with the ♡.</p>`
+      : `<div class="rule2"></div><b>Nothing in the catalog matches.</b><p>The management suggests fewer filters — or the Surprise button.</p>`;
+  } else empty.style.display="none";
+}
+
+/* ── controls wiring ── */
+$("search").addEventListener("input",e=>{ state.q=normTxt(e.target.value.trim()); apply(); });
+$("f-genre").onchange=e=>{ state.genre=e.target.value; apply(); };
+$("f-decade").onchange=e=>{ state.decade=e.target.value; apply(); };
+$("f-rating").onchange=e=>{ state.rating=e.target.value; apply(); };
+$("f-service").onchange=e=>{ state.service=e.target.value; apply(); };
+$("f-sort").onchange=e=>{ state.sort=e.target.value; apply(); };
+$("reset").onclick=()=>{
+  state.q=""; state.moods.clear(); state.genre=state.decade=state.rating=state.service="";
+  $("search").value=""; ["f-genre","f-decade","f-rating","f-service"].forEach(id=>$(id).value="");
+  document.querySelectorAll("#moods .chip").forEach(c=>c.setAttribute("aria-pressed","false"));
+  apply();
+};
+$("seg").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  state.seg=b.dataset.seg;
+  document.querySelectorAll("#seg button").forEach(x=>x.setAttribute("aria-pressed", x===b));
+  apply();
+});
+
+/* ── streaming availability (optional providers.json, generated via TMDB) ── */
+let PROV = null;
+fetch("providers.json")
+  .then(r => r.ok ? r.json() : null)
+  .then(j => {
+    if(!j || !j.us) return;
+    PROV = j;
+    const a=$("attrib"); if(a) a.style.display=""; const o=$("office"); if(o) o.style.display="";
+    // populate the service filter, most-stocked services first
+    const counts = new Map();
+    Object.values(j.us).forEach(e=>(e.s||[]).forEach(s=>counts.set(s,(counts.get(s)||0)+1)));
+    const sel = $("f-service");
+    [...counts.entries()]
+      .sort((x,y)=>y[1]-x[1] || x[0].localeCompare(y[0]))
+      .forEach(([name,c])=>{
+        const o=document.createElement("option");
+        o.value=name; o.textContent=`${name} (${c})`;
+        sel.appendChild(o);
+      });
+    sel.style.display="";
+  })
+  .catch(()=>{});
+function watchBlock(m){
+  const jw = `https://www.justwatch.com/us/search?q=${encodeURIComponent(m.t)}`;
+  const entry = PROV && PROV.us && PROV.us[m.id];
+  const asof = PROV && PROV.generated ? `<span class="asof">as of ${PROV.generated}</span>` : "";
+  let chips;
+  if(entry && entry.s && entry.s.length){
+    chips = entry.s.map(s=>`<span class="tag stream">${s}</span>`).join("") + asof;
+  } else if(entry){
+    chips = `<span class="tag faded">Not on a subscription right now — rent or buy</span>` + asof;
+  } else {
+    chips = "";
+  }
+  const link = (entry && entry.l) || jw;
+  return `<div class="watch"><div class="notes-label">Where to watch</div>
+    <div class="chips">${chips}<a class="wlink" href="${link}" target="_blank" rel="noopener">Check availability ↗</a></div></div>`;
+}
+
+/* ── catalog entry modal ── */
+let lastFocus=null;
+function openTicket(m){
+  if(!$("overlay").classList.contains("open")) lastFocus=document.activeElement;
+  const b=$("ticket-body");
+  b.innerHTML=`
+    <div class="t-no">${num(m)} · In the collection</div>
+    <div class="t-top">
+      <div class="t-poster"><div class="poster">${posterInner(m)}</div></div>
+      <div class="t-head">
+        <div class="t-title">${m.t}</div>
+        <div class="t-facts">${yearLine(m)} · ${fmtRt(m)}${m.tv?` · ${m.net}`:""} · <span class="${m.r==="R"||m.r==="TV-MA"?"r":""}">${m.r}</span><br>${m.tv?"Created by":"Directed by"} ${m.d}</div>
+        <div class="chips">
+          ${m.g.map(g=>`<span class="tag">${g}</span>`).join("")}
+          ${m.m.map(k=>`<span class="tag">${MOOD_LABEL[k]}</span>`).join("")}
+          ${m.sp?`<span class="tag">Spook ${"•".repeat(m.sp)}</span>`:""}
+          ${m.sub?`<span class="tag">Subtitled — worth it</span>`:""}
+          ${m.start?`<span class="tag">First pick</span>`:""}
+        </div>
+      </div>
+    </div>
+    <div class="notes"><div class="notes-label">Program notes, by Dad</div><p>${m.p}</p></div>
+    ${alsoBlock(m)}
+    ${watchBlock(m)}
+    <div class="t-actions">
+      <button class="wbtn" id="t-watched" aria-pressed="${!!store.w[m.id]}">${store.w[m.id]?"Seen ✓":"Mark as seen"}</button>
+      <div class="stars" role="radiogroup" aria-label="Your rating">
+        <span class="lbl">Your rating</span>
+        ${[1,2,3,4,5].map(n=>`<button class="star ${store.s[m.id]>=n?"on":""}" data-n="${n}" role="radio" aria-checked="${store.s[m.id]===n}" aria-label="${n} star${n>1?"s":""}">★</button>`).join("")}
+      </div>
+    </div>`;
+  b.querySelector("#t-watched").onclick=e=>{
+    toggleWatched(m);
+    const on=!!store.w[m.id];
+    e.target.setAttribute("aria-pressed",on);
+    e.target.textContent = on?"Seen ✓":"Mark as seen";
+  };
+  b.querySelectorAll(".star").forEach(st=>st.onclick=()=>{
+    const n=+st.dataset.n;
+    store.s[m.id] = store.s[m.id]===n ? 0 : n;
+    if(!store.s[m.id]) delete store.s[m.id];
+    if(store.s[m.id] && !store.w[m.id]){ store.w[m.id]=1; updateProgress(); }
+    save(); refreshCard(m);
+    b.querySelectorAll(".star").forEach(x=>{
+      x.classList.toggle("on", store.s[m.id]>=+x.dataset.n);
+      x.setAttribute("aria-checked", store.s[m.id]===+x.dataset.n);
+    });
+    const w=b.querySelector("#t-watched");
+    w.setAttribute("aria-pressed",!!store.w[m.id]);
+    w.textContent = store.w[m.id]?"Seen ✓":"Mark as seen";
+  });
+  b.querySelectorAll("[data-also]").forEach(bt=>bt.onclick=()=>{
+    const x=byId.get(bt.dataset.also); if(x) openTicket(x);
+  });
+  $("overlay").classList.add("open");
+  $("ticket").scrollTop=0;
+  document.body.style.overflow="hidden";
+  $("close").focus();
+}
+function closeTicket(){
+  $("overlay").classList.remove("open");
+  document.body.style.overflow="";
+  if(lastFocus) lastFocus.focus();
+}
+$("close").onclick=closeTicket;
+$("overlay").addEventListener("click",e=>{ if(e.target===e.currentTarget) closeTicket(); });
+addEventListener("keydown",e=>{ if(e.key==="Escape") closeTicket(); });
+
+/* ── surprise ── */
+$("fab").onclick=()=>{
+  let pool = current.filter(m=>!store.w[m.id]);
+  if(!pool.length) pool = current.length?current:DATA;
+  const pick = pool[Math.floor(Math.random()*pool.length)];
+  const withArt = pool.filter(m=>POSTERS[m.id]);
+  if(reduced || withArt.length<4){ openTicket(pick); return; }
+  const spin=$("spin"), img=$("spin-img");
+  spin.classList.add("open");
+  let n=0;
+  const iv=setInterval(()=>{
+    const r=withArt[Math.floor(Math.random()*withArt.length)];
+    img.src=POSTERS[r.id];
+    if(++n>=12){
+      clearInterval(iv);
+      if(POSTERS[pick.id]) img.src=POSTERS[pick.id];
+      setTimeout(()=>{ spin.classList.remove("open"); openTicket(pick); }, 420);
+    }
+  }, 95);
+};
+
+updateProgress();
+apply();
+</script>

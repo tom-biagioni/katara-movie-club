@@ -1,0 +1,27 @@
+name: Add a title
+description: File a film or show into the collection (looked up automatically on TMDB)
+title: "[Add] "
+labels: ["add-title"]
+body:
+  - type: input
+    id: film-title
+    attributes:
+      label: Title
+      description: Include the year if there could be more than one (e.g. "Heat 1995")
+      placeholder: Heat 1995
+    validations:
+      required: true
+  - type: dropdown
+    id: media-type
+    attributes:
+      label: Type
+      options:
+        - Film
+        - TV series
+      default: 0
+  - type: textarea
+    id: program-notes
+    attributes:
+      label: Program notes
+      description: One or two sentences, no spoilers — the pitch. Leave blank to fill in later.
+      placeholder: "Cops and thieves as mirror images, De Niro across a table from Pacino."
